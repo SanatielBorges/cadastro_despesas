@@ -83,6 +83,46 @@ const ErrorMessage = styled.p`
   width: 100%;
 `;
 
+const Modal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 100%;
+`;
+
+const ModalButton = styled.button`
+  padding: 10px 20px;
+  margin: 0 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #0056b3;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+  }
+`;
+
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 };
@@ -100,6 +140,7 @@ const ExpenseItem: React.FC<ExpenseItemProps> = ({ id, name, amount, type, dueDa
   const [editedAmount, setEditedAmount] = useState(amount.toString());
   const [editedType, setEditedType] = useState(type);
   const [editedDueDate, setEditedDueDate] = useState(dueDate);
+  const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState('');
   const dispatch = useDispatch();
 
@@ -123,7 +164,16 @@ const ExpenseItem: React.FC<ExpenseItemProps> = ({ id, name, amount, type, dueDa
   };
 
   const handleDelete = () => {
+    setShowModal(true);
+  };
+
+  const confirmDelete = () => {
     dispatch(deleteExpense(id));
+    setShowModal(false);
+  };
+
+  const cancelDelete = () => {
+    setShowModal(false);
   };
 
   const handleTogglePaid = () => {
@@ -142,8 +192,22 @@ const ExpenseItem: React.FC<ExpenseItemProps> = ({ id, name, amount, type, dueDa
     }
   };
 
+  const today = new Date().toISOString().split('T')[0];
+  const isVencida = new Date(dueDate) < new Date(today) && !paid;
+
   return (
-    <ListItem>
+    <ListItem className={isVencida ? 'vencida' : ''}>
+      {showModal && (
+        <Modal>
+          <ModalContent>
+            <p>Você tem certeza que deseja excluir esta despesa?</p>
+            <div>
+              <ModalButton onClick={confirmDelete}>Sim</ModalButton>
+              <ModalButton onClick={cancelDelete}>Não</ModalButton>
+            </div>
+          </ModalContent>
+        </Modal>
+      )}
       {isEditing ? (
         <InfoContainer>
           <Input

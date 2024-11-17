@@ -66,4 +66,8 @@ export const GlobalStyles = createGlobalStyle`
     outline: none;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
   }
+
+  .vencida {
+    color: red;
+  }
 `;
